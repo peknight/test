@@ -54,9 +54,9 @@ public class TestServerConfig {
     }
 
     @Bean
-    public TThreadedSelectorServer testTServer(SystemService.Iface systemService, @Value("${test.server.open}") boolean open) throws TTransportException {
+    public TThreadedSelectorServer testTServer(@Value("${test.server.open}") boolean open) throws TTransportException {
         TMultiplexedProcessor multiplexedProcessor = new TMultiplexedProcessor();
-        multiplexedProcessor.registerProcessor("SystemService", new SystemService.Processor<>(systemService));
+        multiplexedProcessor.registerProcessor("SystemService", new SystemService.Processor<>(systemServiceImpl()));
         TNonblockingServerTransport tNonblockingServerTransport = new TNonblockingServerSocket(port);
         TThreadedSelectorServer.Args tThreadedSelectorServerArgs = new TThreadedSelectorServer.Args(tNonblockingServerTransport);
         tThreadedSelectorServerArgs.processor(multiplexedProcessor);

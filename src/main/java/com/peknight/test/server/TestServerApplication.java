@@ -14,6 +14,5 @@ public class TestServerApplication {
 
 	public static void main(String[] args) {
 		ApplicationContextHolder.run(TestServerApplication.class, args, Banner.Mode.LOG);
-		ApplicationContextHolder.getBean("testTServer", TServer.class).serve();
     }
 }

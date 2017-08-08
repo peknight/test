@@ -1,6 +1,5 @@
 package com.peknight.test.server.config;
 
-import com.peknight.common.config.CommonConfig;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.Documented;

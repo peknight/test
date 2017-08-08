@@ -27,13 +27,10 @@ import com.peknight.common.collection.ArrayUtils;
 import com.peknight.common.springframework.context.ApplicationContextHolder;
 import com.peknight.common.string.JsonUtils;
 import com.peknight.common.string.StringUtils;
-import com.peknight.test.thrift.service.ActionResult;
-import com.peknight.test.thrift.service.ActionStatus;
 import com.peknight.test.thrift.service.BeanInfo;
 import com.peknight.test.thrift.service.ConstructorInfo;
 import com.peknight.test.thrift.service.MethodInfo;
 import com.peknight.test.thrift.service.ObjectInfo;
-import com.peknight.test.thrift.service.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
