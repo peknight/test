@@ -21,46 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.peknight.test.client.config;
-
-import com.peknight.test.thrift.service.SystemService;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TMultiplexedProtocol;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.Scanner;
+package com.peknight.test;
 
 /**
  *
  *
  * @author PeKnight
  *
- * Created by PeKnight on 2017/7/31.
+ * Created by PeKnight on 2017/8/10.
  */
-@Configuration
-public class TestClientConfig {
-    @Value("${test.server.address}")
-    private String address;
-    @Value("${test.server.port}")
-    private int port;
+public class TestA {
+    public TestA() {};
 
-    @Bean
-    public TTransport clientTTransport() {
-        return new TFramedTransport(new TSocket(address, port));
-    }
-
-    @Bean
-    public SystemService.Iface systemServiceClient(TTransport clientTTransport) {
-        return new SystemService.Client(new TMultiplexedProtocol(new TBinaryProtocol(clientTTransport), "SystemService"));
-    }
-
-    @Bean
-    public Scanner scanner() {
-        return new Scanner(System.in);
-    }
+    public TestA(TestA testA) {};
 }

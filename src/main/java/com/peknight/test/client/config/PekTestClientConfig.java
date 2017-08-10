@@ -21,20 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.peknight.test.server.config;
+package com.peknight.test.client.config;
 
-import com.peknight.test.server.service.SystemServiceImpl;
+import com.peknight.test.thrift.reflect.ReflectService;
+import com.peknight.test.thrift.service.MessageService;
 import com.peknight.test.thrift.service.SystemService;
-import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.server.TThreadedSelectorServer;
+import org.apache.thrift.protocol.TMultiplexedProtocol;
 import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TNonblockingServerSocket;
-import org.apache.thrift.transport.TNonblockingServerTransport;
-import org.apache.thrift.transport.TTransportException;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Scanner;
 
 /**
  *
@@ -44,33 +45,36 @@ import org.springframework.context.annotation.Configuration;
  * Created by PeKnight on 2017/7/31.
  */
 @Configuration
-public class TestServerConfig {
+public class PekTestClientConfig {
+
+    @Value("${test.server.address}")
+    private String address;
+
     @Value("${test.server.port}")
     private int port;
 
     @Bean
-    public SystemService.Iface systemServiceImpl() {
-        return new SystemServiceImpl();
+    public TTransport pekTestClientTTransport() {
+        return new TFramedTransport(new TSocket(address, port));
     }
 
     @Bean
-    public TThreadedSelectorServer testTServer(@Value("${test.server.open}") boolean open) throws TTransportException {
-        TMultiplexedProcessor multiplexedProcessor = new TMultiplexedProcessor();
-        multiplexedProcessor.registerProcessor("SystemService", new SystemService.Processor<>(systemServiceImpl()));
-        TNonblockingServerTransport tNonblockingServerTransport = new TNonblockingServerSocket(port);
-        TThreadedSelectorServer.Args tThreadedSelectorServerArgs = new TThreadedSelectorServer.Args(tNonblockingServerTransport);
-        tThreadedSelectorServerArgs.processor(multiplexedProcessor);
-        tThreadedSelectorServerArgs.transportFactory(new TFramedTransport.Factory());
-        tThreadedSelectorServerArgs.protocolFactory(new TBinaryProtocol.Factory());
-        TThreadedSelectorServer testTServer = new TThreadedSelectorServer(tThreadedSelectorServerArgs);
-        if (open) {
-            new Thread("TestServer") {
-                @Override
-                public void run() {
-                    testTServer.serve();
-                }
-            }.start();
-        }
-        return testTServer;
+    public SystemService.Iface systemServiceClient(TTransport clientTTransport) {
+        return new SystemService.Client(new TMultiplexedProtocol(new TBinaryProtocol(clientTTransport), "SystemService"));
+    }
+
+    @Bean
+    public ReflectService.Iface reflectServiceClient(TTransport clientTTransport) {
+        return new ReflectService.Client(new TMultiplexedProtocol(new TBinaryProtocol(clientTTransport), "ReflectService"));
+    }
+
+    @Bean
+    public MessageService.Iface messageServiceClient(TTransport clientTTransport) {
+        return new MessageService.Client(new TMultiplexedProtocol(new TBinaryProtocol(clientTTransport), "MessageService"));
+    }
+
+    @Bean
+    public Scanner scanner() {
+        return new Scanner(System.in);
     }
 }

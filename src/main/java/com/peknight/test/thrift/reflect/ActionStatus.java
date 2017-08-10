@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-package com.peknight.test.thrift.service;
+package com.peknight.test.thrift.reflect;
 
 
 import java.util.Map;

@@ -21,23 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.peknight.test.client.service;
+package com.peknight.test.client;
 
-import com.peknight.test.thrift.service.MethodInfo;
-import com.peknight.test.thrift.service.ObjectInfo;
+import com.peknight.common.config.PekApplication;
+import com.peknight.common.springframework.context.ApplicationContextHolder;
+import org.apache.thrift.transport.TTransport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.Banner;
 
-import java.util.List;
+import javax.annotation.Resource;
 
-/**
- *
- *
- * @author PeKnight
- *
- * Created by PeKnight on 2017/7/31.
- */
-public interface InvokeService extends GlobalService {
+@PekApplication
+public class PekTestClientApplication {
 
-    MethodInfo selectMethod(List<MethodInfo> methodList);
+	private static final Logger LOGGER = LoggerFactory.getLogger(PekTestClientApplication.class);
 
-    void setParamList(List<ObjectInfo> paramList) throws Exception;
+	@Resource
+    private TTransport pekTestClientTTransport;
+
+	public void startClient() throws Exception {
+        pekTestClientTTransport.open();
+        pekTestClientTTransport.close();
+    }
+
+	public static void main(String[] args) throws Exception {
+		ApplicationContextHolder.run(PekTestClientApplication.class, args, Banner.Mode.LOG);
+		ApplicationContextHolder.getBean(PekTestClientApplication.class).startClient();
+    }
 }

@@ -1,0 +1,53 @@
+namespace java com.peknight.test.thrift.service
+
+service MessageService {
+    oneway void message(1:string message),
+}
+
+service SystemService {
+
+    /**
+     * 一定时间后开启服务
+     */
+    oneway void startService(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 一定时间后暂停服务
+     */
+    oneway void pauseService(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 一定时间后重启服务
+     */
+    oneway void restartService(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 终止服务
+     */
+    oneway void stopService(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 初始化环境
+     */
+    oneway void initEnvironment(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 初始化开发环境
+     */
+    oneway void initDevelopment(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 重置环境
+     */
+    oneway void restoreEnvironment(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 重置开发环境
+     */
+    oneway void restoreDevelopment(1:string serviceName, 2:i64 millis),
+
+    /**
+     * 关闭程序
+     */
+    oneway void shutdown(1:i64 millis)
+}

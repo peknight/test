@@ -1,0 +1,102 @@
+namespace java com.peknight.test.thrift.reflect
+
+enum ActionStatus {
+    Success = 0,
+    Fail = 1
+}
+
+struct ActionResult {
+    1:ActionStatus status,
+    2:string message,
+    3:string value
+}
+
+struct ClassInfo {
+    1:string className,
+    2:list<ClassInfo> componentClassList,
+    3:list<ClassInfo> implementClassList,
+    4:list<ConstructorInfo> constructorList,
+    5:list<string> enumValues
+}
+
+struct BeanInfo {
+    1:string className,
+    2:string beanName
+}
+
+struct ConstructorInfo {
+    1:string className,
+    2:list<ClassInfo> paramList,
+    3:i32 modifiers,
+    4:bool isAccessible
+}
+
+struct MethodInfo {
+    1:string className,
+    2:string methodName,
+    3:list<ClassInfo> paramList,
+    4:i32 modifiers,
+    5:bool isAccessible
+}
+
+struct BeanCall {
+    1:string declaredClassName,
+    2:string actualClassName,
+    3:string beanName,
+    4:string beanValue,
+    5:ConstructorCall constructor,
+    6:MethodCall method,
+    7:list<BeanCall> collectionComponents,
+    8:list<list<BeanCall>> mapComponents
+}
+
+struct ConstructorCall {
+    1:string className,
+    2:list<BeanCall> paramList,
+}
+
+struct MethodCall {
+    1:string className,
+    2:BeanCall invoker,
+    3:string methodName,
+    4:list<BeanCall> paramList,
+    5:string returnBeanName
+}
+
+service ReflectService {
+
+    /**
+     * 获取类信息
+     */
+    ClassInfo getClass(1:string className, 2:list<string> searchPackages),
+
+    /**
+     * 列出包中所有的类
+     */
+    list<ClassInfo> listClass(1:list<string> basePackages, 2:list<string> searchPackages),
+
+    /**
+     * 列出所有的bean
+     */
+    list<BeanInfo> listBean(),
+
+    /**
+     * 获取方法信息
+     */
+    MethodInfo getMethod(1:string className, 2:string methodName, 3:list<string> paramList, 4:list<string> searchPackages),
+
+    /**
+     * 列出类所有方法
+     */
+    list<MethodInfo> listMethod(1:string className, 2:list<string> searchPackages),
+
+    /**
+     * 创建Bean
+     */
+    ActionResult createBean(1:BeanCall beanCall),
+
+    /**
+     * 执行方法
+     */
+    ActionResult invokeMethod(2:MethodCall methodCall),
+}
