@@ -21,22 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.peknight.test.server.config;
+package com.peknight.test.client.logging;
 
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
+import com.peknight.common.logging.CommonLogAspect;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
+import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
 
 /**
- * 判断是否有SystemService的默认实现
+ * 接口日志
  *
  * @author PeKnight
  *
- * Created by PeKnight on 2017/8/10.
+ * Created by PeKnight on 2017/8/11.
  */
-public class SystemServiceCondition implements Condition {
-    @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        return !context.getBeanFactory().containsBean("systemServiceImpl");
+@Aspect
+@Component
+public class PekTestLogAspect {
+    @Around("execution(* com.peknight.test.thrift.*.*.Iface.*(..))")
+    public Object aroundThriftIfaceLogger(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+        Method method = ((MethodSignature) proceedingJoinPoint.getSignature()).getMethod();
+        Logger logger = LoggerFactory.getLogger(method.getDeclaringClass());
+        return CommonLogAspect.commonLog(proceedingJoinPoint, logger, Level.INFO);
     }
 }

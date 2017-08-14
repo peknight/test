@@ -21,17 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.peknight.test;
+package com.peknight.test.client.shell;
+
+import com.peknight.common.io.ScannerUtils;
+import com.peknight.common.service.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
+import java.util.Scanner;
 
 /**
  *
  *
  * @author PeKnight
  *
- * Created by PeKnight on 2017/8/10.
+ * Created by PeKnight on 2017/8/11.
  */
-public class TestA {
-    public TestA() {};
+@Component
+public class HomeShell {
 
-    public TestA(TestA testA) {};
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeShell.class);
+
+    @Resource
+    private Scanner scanner;
+
+    @Resource
+    private HomeShellInputDispatcher homeShellInputDispatcher;
+
+    @Resource
+    private State homeShellState;
+
+    public void shell() {
+        homeShellState.setRunning(true);
+        while (homeShellState.isRunning()) {
+            LOGGER.info("INPUT [$i] Or [#i] For Information");
+            ScannerUtils.next(scanner, homeShellInputDispatcher);
+        }
+    }
 }

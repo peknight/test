@@ -23,21 +23,22 @@
  */
 package com.peknight.test.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.peknight.common.collection.ArrayUtils;
 import com.peknight.common.logging.CommonLog;
 import com.peknight.common.reflect.material.BeanContext;
 import com.peknight.common.reflect.material.BeanCreationException;
 import com.peknight.common.reflect.material.BeanMaterial;
 import com.peknight.common.reflect.material.MethodMaterial;
-import com.peknight.common.reflect.metadata.ClassMetadata;
 import com.peknight.common.reflect.metadata.MetadataContext;
 import com.peknight.common.reflect.metadata.MethodMetadata;
 import com.peknight.common.reflect.util.ClassUtils;
 import com.peknight.common.reflect.util.MethodUtils;
+import com.peknight.common.string.JsonUtils;
+import com.peknight.common.string.StringUtils;
 import com.peknight.test.thrift.reflect.ActionResult;
 import com.peknight.test.thrift.reflect.ActionStatus;
 import com.peknight.test.thrift.reflect.BeanCall;
-import com.peknight.test.thrift.reflect.BeanInfo;
 import com.peknight.test.thrift.reflect.ClassInfo;
 import com.peknight.test.thrift.reflect.MethodCall;
 import com.peknight.test.thrift.reflect.MethodInfo;
@@ -54,7 +55,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
+ * 反射服务实现类
  *
  * @author PeKnight
  *
@@ -64,9 +65,13 @@ import java.util.Set;
 public class ReflectServiceImpl implements ReflectService.Iface {
 
     @Override
-    public ClassInfo getClass(String className, List<String> searchPackages) throws TException {
+    public ClassInfo getClassInfo(String className, List<String> searchPackages) throws TException {
+        String[] searchPackageArray = null;
+        if (searchPackages != null) {
+            searchPackageArray = ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()]);
+        }
         try {
-            return ConvertUtils.getClassInfo(new HashSet<>(), MetadataContext.getClassMetadata(ClassUtils.forName(className)), ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()]));
+            return ConvertUtils.getClassInfo(new HashSet<>(), MetadataContext.getClassMetadata(ClassUtils.forName(className)), searchPackageArray);
         } catch (IOException e) {
             throw new TException(e);
         } catch (ClassNotFoundException e) {
@@ -75,12 +80,16 @@ public class ReflectServiceImpl implements ReflectService.Iface {
     }
 
     @Override
-    public List<ClassInfo> listClass(List<String> basePackages, List<String> searchPackages) throws TException {
+    public List<ClassInfo> listClassInfo(List<String> basePackages, List<String> searchPackages) throws TException {
+        String[] searchPackageArray = null;
+        if (searchPackages != null) {
+            searchPackageArray = ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()]);
+        }
         List<ClassInfo> classInfoList = new ArrayList<>();
         try {
             Set<Class> classSet = ClassUtils.listClass(ArrayUtils.collectionToArray(basePackages, new String[basePackages.size()]));
             for (Class clazz : classSet) {
-                classInfoList.add(ConvertUtils.getClassInfo(new HashSet<>(), MetadataContext.getClassMetadata(clazz), ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()])));
+                classInfoList.add(ConvertUtils.getClassInfo(new HashSet<>(), MetadataContext.getClassMetadata(clazz), searchPackageArray));
             }
             return classInfoList;
         } catch (IOException e) {
@@ -89,23 +98,16 @@ public class ReflectServiceImpl implements ReflectService.Iface {
     }
 
     @Override
-    public List<BeanInfo> listBean() throws TException {
-        List<String> keys = BeanContext.listKey();
-        List<BeanInfo> beanList = new ArrayList<>(keys.size());
-        for (String key : keys) {
-            String className = BeanContext.get(key).getClass().getName();
-            beanList.add(new BeanInfo(className, key));
+    public MethodInfo getMethodInfo(String className, String methodName, List<String> paramList, List<String> searchPackages) throws TException {
+        String[] searchPackageArray = null;
+        if (searchPackages != null) {
+            searchPackageArray = ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()]);
         }
-        return beanList;
-    }
-
-    @Override
-    public MethodInfo getMethod(String className, String methodName, List<String> paramList, List<String> searchPackages) throws TException {
         try {
             Class clazz = ClassUtils.forName(className);
             Class[] parameterTypes = MethodUtils.getParameterTypesByClassNames(paramList);
             Method method = MethodUtils.getMethod(clazz, methodName, parameterTypes);
-            return ConvertUtils.getMethodInfo(new HashSet<>(), MetadataContext.getMethodMetadata(method), ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()]));
+            return ConvertUtils.getMethodInfo(new HashSet<>(), MetadataContext.getMethodMetadata(method), searchPackageArray);
         } catch (ClassNotFoundException e) {
             throw new TException(e);
         } catch (NoSuchMethodException e) {
@@ -116,12 +118,16 @@ public class ReflectServiceImpl implements ReflectService.Iface {
     }
 
     @Override
-    public List<MethodInfo> listMethod(String className, List<String> searchPackages) throws TException {
+    public List<MethodInfo> listMethodInfo(String className, List<String> searchPackages) throws TException {
+        String[] searchPackageArray = null;
+        if (searchPackages != null) {
+            searchPackageArray = ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()]);
+        }
         List<MethodInfo> methodInfoList = new ArrayList<>();
         try {
             Class clazz = ClassUtils.forName(className);
             for (MethodMetadata methodMetadata : MethodUtils.getMethodSet(clazz)) {
-                methodInfoList.add(ConvertUtils.getMethodInfo(new HashSet<>(), methodMetadata, ArrayUtils.collectionToArray(searchPackages, new String[searchPackages.size()])));
+                methodInfoList.add(ConvertUtils.getMethodInfo(new HashSet<>(), methodMetadata, searchPackageArray));
             }
             return methodInfoList;
         } catch (ClassNotFoundException e) {
@@ -132,12 +138,33 @@ public class ReflectServiceImpl implements ReflectService.Iface {
     }
 
     @Override
+    public List<BeanCall> listBean() throws TException {
+        List<String> keys = BeanContext.listKey();
+        List<BeanCall> beanList = new ArrayList<>(keys.size());
+        for (String key : keys) {
+            Object object = BeanContext.get(key);
+            String className = object.getClass().getName();
+            BeanCall beanCall = new BeanCall();
+            beanCall.setDeclaredClassName(className);
+            beanCall.setActualClassName(className);
+            beanCall.setBeanName(key);
+            try {
+                beanCall.setBeanValue(JsonUtils.write(object));
+            } catch (JsonProcessingException e) {}
+            beanList.add(beanCall);
+        }
+        return beanList;
+    }
+
+    @Override
     public ActionResult createBean(BeanCall beanCall) throws TException {
         try {
             BeanMaterial beanMaterial = ConvertUtils.getBeanMaterial(beanCall);
-            beanMaterial.getBean();
-            BeanInfo beanInfo = new BeanInfo(beanCall.getActualClassName(), beanCall.getBeanName());
-            return new ActionResult(ActionStatus.Success, "Success", beanInfo.toString());
+            String value = null;
+            try {
+                value = JsonUtils.write(beanMaterial.getBean());
+            } catch (JsonProcessingException e) {}
+            return new ActionResult(ActionStatus.Success, "Success", value);
         } catch (ClassNotFoundException e) {
             return new ActionResult(ActionStatus.Fail, e.getMessage(), null);
         } catch (NoSuchMethodException e) {
@@ -153,7 +180,7 @@ public class ReflectServiceImpl implements ReflectService.Iface {
             MethodMaterial methodMaterial = ConvertUtils.getMethodMaterial(methodCall);
             methodMaterial.invokeMethod();
             Object returnValue = methodMaterial.getReturnValue();
-            return new ActionResult(ActionStatus.Success, "Success", returnValue.toString());
+            return new ActionResult(ActionStatus.Success, "Success", StringUtils.toString(returnValue));
         } catch (ClassNotFoundException e) {
             return new ActionResult(ActionStatus.Fail, e.getMessage(), null);
         } catch (NoSuchMethodException e) {

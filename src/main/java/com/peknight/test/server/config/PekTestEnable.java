@@ -24,14 +24,12 @@
 package com.peknight.test.server.config;
 
 
-import com.peknight.common.logging.LogUtils;
-import com.peknight.test.thrift.service.SystemService;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
- *
+ * 判断是否启动PekTest
  *
  * @author PeKnight
  *

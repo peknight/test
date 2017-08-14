@@ -23,9 +23,6 @@
  */
 package com.peknight.test.server.config;
 
-import com.peknight.common.logging.LogUtils;
-import com.peknight.common.springframework.context.ApplicationContextHolder;
-import com.peknight.test.service.MessageServiceImpl;
 import com.peknight.test.service.ReflectServiceImpl;
 import com.peknight.test.thrift.reflect.ReflectService;
 import com.peknight.test.thrift.service.MessageService;
@@ -40,15 +37,11 @@ import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.core.env.Environment;
 
-import javax.annotation.PostConstruct;
 import java.net.InetSocketAddress;
-import java.util.Date;
 
 /**
  *
@@ -61,12 +54,6 @@ import java.util.Date;
 public class PekTestServerConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PekTestServerConfig.class);
-
-    @Value("${test.client.address}")
-    private String address;
-
-    @Value("${test.server.port}")
-    private int port;
 
     @Bean
     public ReflectService.Iface reflectServiceImpl() {
@@ -99,12 +86,22 @@ public class PekTestServerConfig {
     }
 
     @Bean
-    public TThreadedSelectorServer pekTestTServer(ReflectService.Iface reflectServiceImpl, MessageService.Iface messageServiceImpl, SystemService.Iface systemServiceImpl) throws TTransportException {
+    public TThreadedSelectorServer pekTestTServer(Environment environment, ReflectService.Iface reflectServiceImpl, MessageService.Iface messageServiceImpl, SystemService.Iface systemServiceImpl) throws TTransportException {
         TMultiplexedProcessor multiplexedProcessor = new TMultiplexedProcessor();
         multiplexedProcessor.registerProcessor("ReflectService", new ReflectService.Processor<>(reflectServiceImpl));
         multiplexedProcessor.registerProcessor("MessageService", new MessageService.Processor<>(messageServiceImpl));
         multiplexedProcessor.registerProcessor("SystemService", new SystemService.Processor<>(systemServiceImpl));
-        TNonblockingServerTransport tNonblockingServerTransport = new TNonblockingServerSocket(new InetSocketAddress(address, port));
+
+        TNonblockingServerTransport tNonblockingServerTransport;
+        String address = environment.getProperty("test.client.address");
+        String portString = environment.getProperty("test.server.port");
+        int port = portString == null ? 6712 : Integer.parseInt(portString);
+        if (address == null) {
+            tNonblockingServerTransport = new TNonblockingServerSocket(port);
+        } else {
+            tNonblockingServerTransport = new TNonblockingServerSocket(new InetSocketAddress(address, port));
+        }
+
         TThreadedSelectorServer.Args tThreadedSelectorServerArgs = new TThreadedSelectorServer.Args(tNonblockingServerTransport);
         tThreadedSelectorServerArgs.processor(multiplexedProcessor);
         tThreadedSelectorServerArgs.transportFactory(new TFramedTransport.Factory());

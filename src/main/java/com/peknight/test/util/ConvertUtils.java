@@ -74,6 +74,7 @@ public final class ConvertUtils {
         if (metadata == null) {
             return null;
         }
+
         ClassInfo classInfo = new ClassInfo();
         classInfo.setClassName(metadata.getDeclaredClass().getName());
         if (metadataSet.contains(metadata)) {
@@ -88,8 +89,12 @@ public final class ConvertUtils {
                 classInfo.setComponentClassList(componentClassList);
             }
         } else {
+            metadataSet.add(metadata);
             classInfo.setComponentClassList(getClassInfoList(metadataSet, metadata.getComponentClassMetadataList(), searchPackages));
-            classInfo.setImplementClassList(getClassInfoList(metadataSet, new ArrayList<ClassMetadata>(metadata.getImplementClassMetadataSet(searchPackages)), searchPackages));
+            Set<ClassMetadata> implementClassMetadataSet = metadata.getImplementClassMetadataSet(searchPackages);
+            if (implementClassMetadataSet != null) {
+                classInfo.setImplementClassList(getClassInfoList(metadataSet, new ArrayList<>(implementClassMetadataSet), searchPackages));
+            }
             classInfo.setConstructorList(getConstructorInfoList(metadataSet, metadata.getConstructorMetadataSet(), searchPackages));
             classInfo.setEnumValues(metadata.getEnumValues());
         }
@@ -153,7 +158,7 @@ public final class ConvertUtils {
         Class actualClass = ClassUtils.forName(beanCall.getActualClassName());
         if (actualClass.isEnum()) {
             return new EnumMaterial(actualClass, beanCall.getBeanName(), beanCall.getBeanValue(), getMethodMaterial(beanCall.getMethod()));
-        } else if (Collection.class.isAssignableFrom(actualClass)) {
+        } else if (Collection.class.isAssignableFrom(actualClass) || actualClass.isArray()) {
             return new CollectionMaterial(declaredClass, actualClass,
                     beanCall.getBeanName(), beanCall.getBeanValue(),
                     getConstructorMaterial(beanCall.getConstructor()),
@@ -185,7 +190,7 @@ public final class ConvertUtils {
             return null;
         }
         Class clazz = ClassUtils.forName(constructorCall.getClassName());
-        List<BeanMaterial> paramList = getBeanMaterialList(constructorCall.getParamList());
+        List<BeanMaterial> paramList = getBeanMaterialList(constructorCall.getParamList() == null ? new ArrayList<>() : constructorCall.getParamList());
         return new ConstructorMaterial(clazz, paramList);
     }
 
@@ -195,7 +200,7 @@ public final class ConvertUtils {
         }
         Class clazz = ClassUtils.forName(methodCall.getClassName());
         BeanMaterial invoker = getBeanMaterial(methodCall.getInvoker());
-        List<BeanMaterial> paramList = getBeanMaterialList(methodCall.getParamList());
+        List<BeanMaterial> paramList = getBeanMaterialList(methodCall.getParamList() == null ? new ArrayList<>() : methodCall.getParamList());
         return new MethodMaterial(clazz, invoker, methodCall.getMethodName(), paramList, methodCall.getReturnBeanName());
     }
 }

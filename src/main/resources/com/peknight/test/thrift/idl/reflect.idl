@@ -19,11 +19,6 @@ struct ClassInfo {
     5:list<string> enumValues
 }
 
-struct BeanInfo {
-    1:string className,
-    2:string beanName
-}
-
 struct ConstructorInfo {
     1:string className,
     2:list<ClassInfo> paramList,
@@ -68,27 +63,27 @@ service ReflectService {
     /**
      * 获取类信息
      */
-    ClassInfo getClass(1:string className, 2:list<string> searchPackages),
+    ClassInfo getClassInfo(1:string className, 2:list<string> searchPackages),
 
     /**
      * 列出包中所有的类
      */
-    list<ClassInfo> listClass(1:list<string> basePackages, 2:list<string> searchPackages),
-
-    /**
-     * 列出所有的bean
-     */
-    list<BeanInfo> listBean(),
+    list<ClassInfo> listClassInfo(1:list<string> basePackages, 2:list<string> searchPackages),
 
     /**
      * 获取方法信息
      */
-    MethodInfo getMethod(1:string className, 2:string methodName, 3:list<string> paramList, 4:list<string> searchPackages),
+    MethodInfo getMethodInfo(1:string className, 2:string methodName, 3:list<string> paramList, 4:list<string> searchPackages),
 
     /**
      * 列出类所有方法
      */
-    list<MethodInfo> listMethod(1:string className, 2:list<string> searchPackages),
+    list<MethodInfo> listMethodInfo(1:string className, 2:list<string> searchPackages),
+
+    /**
+     * 列出所有的bean
+     */
+    list<BeanCall> listBean(),
 
     /**
      * 创建Bean
@@ -98,5 +93,5 @@ service ReflectService {
     /**
      * 执行方法
      */
-    ActionResult invokeMethod(2:MethodCall methodCall),
+    ActionResult invokeMethod(1:MethodCall methodCall),
 }

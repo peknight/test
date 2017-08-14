@@ -25,24 +25,26 @@ package com.peknight.test.client;
 
 import com.peknight.common.config.PekApplication;
 import com.peknight.common.springframework.context.ApplicationContextHolder;
+import com.peknight.test.client.shell.HomeShell;
 import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import javax.annotation.Resource;
 
+@EnableAsync
 @PekApplication
 public class PekTestClientApplication {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PekTestClientApplication.class);
 
 	@Resource
-    private TTransport pekTestClientTTransport;
+	private HomeShell homeShell;
 
 	public void startClient() throws Exception {
-        pekTestClientTTransport.open();
-        pekTestClientTTransport.close();
+        homeShell.shell();
     }
 
 	public static void main(String[] args) throws Exception {

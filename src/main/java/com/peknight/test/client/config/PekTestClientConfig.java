@@ -23,6 +23,7 @@
  */
 package com.peknight.test.client.config;
 
+import com.peknight.common.service.State;
 import com.peknight.test.thrift.reflect.ReflectService;
 import com.peknight.test.thrift.service.MessageService;
 import com.peknight.test.thrift.service.SystemService;
@@ -59,22 +60,27 @@ public class PekTestClientConfig {
     }
 
     @Bean
-    public SystemService.Iface systemServiceClient(TTransport clientTTransport) {
-        return new SystemService.Client(new TMultiplexedProtocol(new TBinaryProtocol(clientTTransport), "SystemService"));
+    public SystemService.Iface systemServiceClient(TTransport pekTestClientTTransport) {
+        return new SystemService.Client(new TMultiplexedProtocol(new TBinaryProtocol(pekTestClientTTransport), "SystemService"));
     }
 
     @Bean
-    public ReflectService.Iface reflectServiceClient(TTransport clientTTransport) {
-        return new ReflectService.Client(new TMultiplexedProtocol(new TBinaryProtocol(clientTTransport), "ReflectService"));
+    public ReflectService.Iface reflectServiceClient(TTransport pekTestClientTTransport) {
+        return new ReflectService.Client(new TMultiplexedProtocol(new TBinaryProtocol(pekTestClientTTransport), "ReflectService"));
     }
 
     @Bean
-    public MessageService.Iface messageServiceClient(TTransport clientTTransport) {
-        return new MessageService.Client(new TMultiplexedProtocol(new TBinaryProtocol(clientTTransport), "MessageService"));
+    public MessageService.Iface messageServiceClient(TTransport pekTestClientTTransport) {
+        return new MessageService.Client(new TMultiplexedProtocol(new TBinaryProtocol(pekTestClientTTransport), "MessageService"));
     }
 
     @Bean
     public Scanner scanner() {
         return new Scanner(System.in);
+    }
+
+    @Bean
+    public State homeShellState() {
+        return new State();
     }
 }
