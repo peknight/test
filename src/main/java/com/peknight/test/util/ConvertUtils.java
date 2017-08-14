@@ -96,7 +96,14 @@ public final class ConvertUtils {
                 classInfo.setImplementClassList(getClassInfoList(metadataSet, new ArrayList<>(implementClassMetadataSet), searchPackages));
             }
             classInfo.setConstructorList(getConstructorInfoList(metadataSet, metadata.getConstructorMetadataSet(), searchPackages));
-            classInfo.setEnumValues(metadata.getEnumValues());
+            List originEnumValues = metadata.getEnumValues();
+            if (originEnumValues != null) {
+                List<String> enumValues = new ArrayList<>(originEnumValues.size());
+                for (Object enumValue : originEnumValues) {
+                    enumValues.add(enumValue.toString());
+                }
+                classInfo.setEnumValues(enumValues);
+            }
         }
         return classInfo;
     }

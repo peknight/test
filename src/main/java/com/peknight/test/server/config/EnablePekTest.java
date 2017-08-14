@@ -1,5 +1,6 @@
 package com.peknight.test.server.config;
 
+import com.peknight.common.springframework.context.ApplicationContextHolder;
 import com.peknight.test.service.MessageServiceImpl;
 import org.springframework.context.annotation.Import;
 
@@ -20,6 +21,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@Import({PekTestServerConfig.class, MessageServiceImpl.class})
+@Import({PekTestServerConfig.class, MessageServiceImpl.class, ApplicationContextHolder.class})
 public @interface EnablePekTest {
 }
