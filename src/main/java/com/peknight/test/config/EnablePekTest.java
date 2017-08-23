@@ -1,4 +1,4 @@
-package com.peknight.test.server.config;
+package com.peknight.test.config;
 
 import com.peknight.common.springframework.context.ApplicationContextHolder;
 import com.peknight.test.service.MessageServiceImpl;

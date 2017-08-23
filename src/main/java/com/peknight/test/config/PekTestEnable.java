@@ -21,43 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.peknight.test.client.shell;
+package com.peknight.test.config;
 
-import com.peknight.common.io.ScannerUtils;
-import com.peknight.common.service.State;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import java.util.Scanner;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
- *
+ * 判断是否启动PekTest
  *
  * @author PeKnight
  *
- * Created by PeKnight on 2017/8/11.
+ * Created by PeKnight on 2017/8/10.
  */
-@Component
-public class HomeShell {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeShell.class);
-
-    @Resource
-    private Scanner scanner;
-
-    @Resource
-    private HomeShellInputDispatcher homeShellInputDispatcher;
-
-    @Resource
-    private State homeShellState;
-
-    public void shell() {
-        homeShellState.setRunning(true);
-        while (homeShellState.isRunning()) {
-            LOGGER.info("INPUT [$i] Or [#i] For Information");
-            ScannerUtils.next(scanner, homeShellInputDispatcher);
+public class PekTestEnable implements Condition {
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        String enable = context.getEnvironment().getProperty("test.server.enable");
+        if (enable != null) {
+            return Boolean.parseBoolean(enable);
+        } else {
+            return false;
         }
     }
 }
