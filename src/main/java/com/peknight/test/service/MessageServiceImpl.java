@@ -24,9 +24,9 @@
 package com.peknight.test.service;
 
 import com.peknight.common.logging.CommonLog;
+import com.peknight.common.logging.Level;
 import com.peknight.test.thrift.service.MessageService;
 import org.apache.thrift.TException;
-import org.slf4j.event.Level;
 
 /**
  *
